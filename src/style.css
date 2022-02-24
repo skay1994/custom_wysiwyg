@@ -155,3 +155,11 @@ body {
     top: 0;
     left: 0;
 }
+
+.variable-badge {
+    background-color: #D2434F;
+    color: #FFF;
+    padding: 0.5rem 1.2rem;
+    border-radius: 3px;
+    margin-right: 0.5rem;
+}
