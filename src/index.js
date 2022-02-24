@@ -6,6 +6,7 @@ const contentArea = editor.getElementsByClassName('content-area')[0];
 const visuellView = contentArea.getElementsByClassName('visuell-view')[0];
 const htmlView = contentArea.getElementsByClassName('html-view')[0];
 const modal = document.getElementsByClassName('modal')[0];
+const modalVariables = document.getElementsByClassName('modal')[1];
 
 // add active tag event
 document.addEventListener('selectionchange', selectionChange);
@@ -24,6 +25,10 @@ for(let i = 0; i < buttons.length; i++) {
         let action = this.dataset.action;
 
         switch(action) {
+            case 'insert-variables':
+                console.log('insert variables');
+                insertVariables();
+                break;
             case 'toggle-view':
                 execCodeAction(this, editor);
                 break;
@@ -35,6 +40,95 @@ for(let i = 0; i < buttons.length; i++) {
         }
 
     });
+}
+
+function insertVariables() {
+    modalVariables.style.display = 'block';
+
+    let selection = saveSelection();
+    let variables = modalVariables.querySelectorAll('input[type="checkbox"]')
+
+    let submit = modalVariables.querySelectorAll('button.done')[0];
+    let close = modalVariables.querySelectorAll('.close');
+
+    submit.addEventListener('click', function() {
+        // get variables by checkbox
+        let variables = modalVariables.querySelectorAll('input[type="checkbox"]:checked');
+        let variableString = '';
+
+        console.log(variables.length);
+
+        for(let i = 0; i < variables.length; i++) {
+            let variable = variables[i];
+
+            const element = document.createElement('span');
+            element.classList.add('variable-badge');
+            element.innerHTML = variable.dataset.name;
+            element.contentEditable = false;
+
+            window.getSelection().getRangeAt(0).insertNode(element);
+
+            // variableString = `<span class="variable-badge" contentEditable="false">${variable.dataset.name}</span>`;
+            //
+            // console.log(window.getSelection(), 'selection', variableString);
+            // document.execCommand('insertHTML', false, variableString);
+            //
+            // const range = selection.getRangeAt(0);
+            // range.setEnd(range.endOffset + 2)
+            //
+            // window.getSelection().addRange(selection.getRangeAt(0).endOffset + 2)
+            // // restoreSelection(selection);
+
+            // document.execCommand('insertText', false, variableString);
+        }
+
+        // restoreSelection(selection);
+        // document.execCommand('insertText', false, variableString);
+        //
+        // window.getSelection().getRangeAt(0).surroundContents(a)
+
+        variableString = '';
+
+        modalVariables.style.display = 'none';
+        submit.removeEventListener('click', arguments.callee);
+    });
+
+    // close modal
+    for(let i = 0; i < close.length; i++) {
+        let closeBtn = close[i];
+
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            modalVariables.style.display = 'none';
+
+            for (let i = 0; i < variables.length; i++) {
+                let variable = variables[i];
+                variable.checked = false;
+            }
+
+            console.log(variables);
+
+            // deregister modal events
+
+            submit.removeEventListener('click', arguments.callee);
+            closeBtn.removeEventListener('click', arguments.callee);
+        });
+    }
+
+    // // get all variables
+    // const variables = document.getElementsByClassName('variable');
+    // // loop through all variables
+    // for (let i = 0; i < variables.length; i++) {
+    //     // get variable
+    //     const variable = variables[i];
+    //     // get variable name
+    //     const variableName = variable.getAttribute('data-name');
+    //     // get variable value
+    //     const variableValue = variable.getAttribute('data-value');
+    //     // insert variable
+    //     visuellView.innerHTML = visuellView.innerHTML.replace(`{{${variableName}}}`, variableValue);
+    // }
 }
 
 /**
@@ -117,19 +211,7 @@ function execDefaultAction(action) {
  * Saves the current selection
  */
 function saveSelection() {
-    if(window.getSelection) {
-        sel = window.getSelection();
-        if(sel.getRangeAt && sel.rangeCount) {
-            let ranges = [];
-            for(var i = 0, len = sel.rangeCount; i < len; ++i) {
-                ranges.push(sel.getRangeAt(i));
-            }
-            return ranges;
-        }
-    } else if (document.selection && document.selection.createRange) {
-        return document.selection.createRange();
-    }
-    return null;
+    return window.getSelection();
 }
 
 /**
